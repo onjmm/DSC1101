@@ -13,58 +13,45 @@ import contractions
 from collections import Counter
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
-# Load data
 data = pd.read_csv("C:\\Users\\Marco\\youtoxic_english_1000.csv")
 sentences = data['Text']
-
-# Initialize lemmatizer and SentimentIntensityAnalyzer
 lemmatizer = WordNetLemmatizer()
 sia = SentimentIntensityAnalyzer()
 
-# Function to expand contractions
 def expand_contractions(text):
     return contractions.fix(text)
 
-# Using NLTK for tokenization and lemmatization
 nltk_results = []
 for sentence in sentences:
-    expanded_sentence = expand_contractions(sentence)  # Expand contractions
-    tokens = word_tokenize(expanded_sentence)  # Tokenize
-    lemmas = [lemmatizer.lemmatize(token) for token in tokens]  # Lemmatize
+    expanded_sentence = expand_contractions(sentence)
+    tokens = word_tokenize(expanded_sentence) 
+    lemmas = [lemmatizer.lemmatize(token) for token in tokens]
     nltk_results.append((tokens, lemmas))
 
-# Using TextBlob for tokenization and lemmatization
 textblob_results = []
 for sentence in sentences:
-    expanded_sentence = expand_contractions(sentence)  # Expand contractions
+    expanded_sentence = expand_contractions(sentence)
     blob = TextBlob(expanded_sentence)
-    tokens = blob.words  # Tokenize
-    lemmas = [word.lemmatize() for word in blob.words]  # Lemmatize
+    tokens = blob.words
+    lemmas = [word.lemmatize() for word in blob.words]
     textblob_results.append((tokens, lemmas))
 
-# Frequency count of tokens and lemmatized words
 nltk_token_count = Counter([token for tokens, _ in nltk_results for token in tokens])
 nltk_lemma_count = Counter([lemma for _, lemmas in nltk_results for lemma in lemmas])
 textblob_token_count = Counter([token for tokens, _ in textblob_results for token in tokens])
 textblob_lemma_count = Counter([lemma for _, lemmas in textblob_results for lemma in lemmas])
-
-# Average word length for tokens and lemmatized words
 avg_nltk_token_length = sum(len(token) for tokens, _ in nltk_results for token in tokens) / sum(len(tokens) for tokens, _ in nltk_results)
 avg_nltk_lemma_length = sum(len(lemma) for _, lemmas in nltk_results for lemma in lemmas) / sum(len(lemmas) for _, lemmas in nltk_results)
 avg_textblob_token_length = sum(len(token) for tokens, _ in textblob_results for token in tokens) / sum(len(tokens) for tokens, _ in textblob_results)
 avg_textblob_lemma_length = sum(len(lemma) for _, lemmas in textblob_results for lemma in lemmas) / sum(len(lemmas) for _, lemmas in textblob_results)
 
-# Sentiment analysis using TextBlob
 textblob_sentiments = [TextBlob(sentence).sentiment for sentence in sentences]
-
-# Sentiment analysis using NLTK (VADER)
 nltk_sentiments = []
 for sentence in sentences:
-    expanded_sentence = expand_contractions(sentence)  # Expand contractions
-    sentiment = sia.polarity_scores(expanded_sentence)  # NLTK sentiment analysis (VADER)
+    expanded_sentence = expand_contractions(sentence)
+    sentiment = sia.polarity_scores(expanded_sentence)
     nltk_sentiments.append(sentiment)
     
-# Compute average sentiment for TextBlob and NLTK
 avg_textblob_polarity = sum(sentiment.polarity for sentiment in textblob_sentiments) / len(textblob_sentiments)
 avg_textblob_subjectivity = sum(sentiment.subjectivity for sentiment in textblob_sentiments) / len(textblob_sentiments)
 
